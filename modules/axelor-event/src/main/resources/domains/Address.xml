@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain-models
+  xmlns="http://axelor.com/xml/ns/domain-models"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://axelor.com/xml/ns/domain-models http://axelor.com/xml/ns/domain-models/domain-models_5.1.xsd">
+
+  <module package="com.axelor.event.db" name="event"/>
+  <entity name="Address">
+    <string name="flatNo" title="Flat/House No."/>
+    <string name="street" title="Street" />
+    <string name="landmark" title="LandMark" />
+    <string name="city" title="City" />
+    <string name="country" title="Country" />
+    <string name="fullName" title="Full Name" namecolumn="true" />
+  </entity>
+</domain-models>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.1.xsd">
+
+	<grid name="event-grid" model="com.axelor.event.db.Event" title="Event">
+		<field name="reference" />
+		<field name="startDate" />
+		<field name="endDate" />
+		<field name="venue" />
+		<field name="regOpenDate" />
+		<field name="regCloseDate" />
+		<field name="capacity" />
+		<field name="eventFees" />
+		<field name="description" />
+		<field name="totalEntry" />
+		<field name="amountCollected" />
+		<field name="totalDiscount" />
+	</grid>
+
+	<form model="com.axelor.event.db.Event" title="Event" name="event-form"
+		width="large">
+		<toolbar>
+			<button name="eventRegImportBtn" title="Import registration"
+				showIf="id" onClick="action-event-view-import-event-registration" />
+		</toolbar>
+		<panel name="overviewPanel">
+			<field name="reference" />
+			<field name="venue" />
+			<field name="startDate" onChange="action-event-condition-on-change-check-date" />
+			<field name="endDate" onChange="action-event-condition-on-change-check-date" />
+			<field name="regOpenDate" onChange="action-event-condition-on-change-check-date" />
+			<field name="regCloseDate" onChange="action-event-condition-on-change-check-date" />
+			<field name="capacity" />
+			<field name="eventFees" onChange="action-event-method-on-change-verify-event" />
+		</panel>
+
+		<panel name="discountPanel">
+			<panel-related field="discountList" form-view="discount-form"
+				grid-view="discount-grid" colSpan="12" />
+		</panel>
+
+		<panel name="eventRegPenel">
+			<panel-related field="eventRegistrationList" colSpan="12"
+				form-view="event-registration-form" grid-view="event-registration-grid"
+				onChange="action-event-method-on-change-compute-event-total" />
+		</panel>
+
+		<panel name="descPanel" colSpan="12">
+			<field name="description" colSpan="12" height="8" widget="html" />
+		</panel>
+
+		<panel name="eventPanel" sidebar="true" title="Event Details"
+			itemSpan="6">
+			<field name="totalEntry" readonly="true" colSpan="12" />
+			<field name="amountCollected" readonly="true" colSpan="12" />
+			<field name="totalDiscount" readonly="true" colSpan="12" />
+		</panel>
+	</form>
+
+	<cards name="event-card" model="com.axelor.event.db.Event" title="Event">
+		<field name="reference" />
+		<field name="startDate" />
+		<field name="endDate" />
+		<field name="venue" />
+		<field name="regOpenDate" />
+		<field name="regCloseDate" />
+		<field name="capacity" />
+		<field name="eventFees" />
+		<field name="description" />
+		<field name="totalEntry" />
+		<field name="amountCollected" />
+		<field name="totalDiscount" />
+		<template>
+      <![CDATA[
+        <div span="12">
+          <h3>{{reference}}</h3><br>
+          ({{startDate}} - {{endDate}})<br>
+          <div span="4">
+            <b>Venue : </b><br><br>
+            <b>Event Fees : </b><br>
+            <b>Registration</b> Open From :
+          </div>
+          <div span="8">
+            {{venue}}<br>
+            {{eventFees}}<br>
+            ({{regOpenDate}} - {{regCloseDate}})
+          </div>
+        </div>
+      ]]>
+    </template>
+	</cards>
+
+	<calendar name="event-calendar" title="Event"
+		model="com.axelor.event.db.Event" colorBy="reference" eventStart="startDate"
+		eventStop="endDate" eventLength="1">
+		<field name="reference" />
+		<field name="venue" />
+	</calendar>
+
+
+	<!-- <form name="import-registration-form" title="Import Registration" model="com.axelor.event.db.EventRegistration"> 
+		<panel name="mainPanel"> <field name="metaFile" title="Input file" type="many-to-one" 
+		target="com.axelor.meta.db.MetaFile" widget="binary-link" /> <button name="importBtn" 
+		colSpan="4" title="Import" readonlyIf="metaFile == null" onClick="action-event-method-on-click-import-registration" 
+		/> </panel> </form> <action-view name="action-event-view-import-event-registration" 
+		title="Import Registration" model="com.axelor.event.registration.db.EventRegistration"> 
+		<view type="form" name="import-registration-form" /> <view-param name="show-toolbar" 
+		value="false" /> <view-param name="width" value="800" /> <view-param name="popup" 
+		value="true" /> <view-param name="show-confirm" value="false" /> <view-param 
+		name="popup-save" value="false" /> <view-param name="popup" value="reload" 
+		/> </action-view> <action-method name="action-event-method-on-click-import-registration"> 
+		<call class="com.axelor.event.web.EventEventController" method="importCsvEventRegistration" 
+		/> </action-method> -->
+
+
+
+
+	<action-condition name="action-event-condition-on-change-check-date">
+
+		<check field="startDate" if="endDate !=null &amp;&amp; startDate &gt; endDate"
+			error="Start Date didn't After End Date" />
+
+		<check field="endDate"
+			if="startDate !=null &amp;&amp; endDate !=null &amp;&amp;  endDate &lt; startDate"
+			error="End Date didn't Before Start Date" />
+
+		<check field="regOpenDate"
+			if="regCloseDate !=null &amp;&amp; regOpenDate &gt; startDate.toLocalDate() || regOpenDate !=null &amp;&amp; regOpenDate &gt; regCloseDate"
+			error="Registration Start Date didn't After Start Date or not after Registration End Date" />
+
+		<check field="regCloseDate"
+			if="regOpenDate !=null &amp;&amp; regCloseDate &gt; startDate.toLocalDate()  || regOpenDate !=null &amp;&amp; regCloseDate &lt; regOpenDate"
+			error="Registration Close Date didn't After End Date or not Before Reg Start Date" />
+	</action-condition>
+
+
+	<action-method name="action-event-method-on-change-compute-event-total">
+		<call class="com.axelor.event.web.EventEventController" method="computeTotal" />
+	</action-method>
+
+	<action-method name="action-event-method-on-change-verify-event">
+		<call class="com.axelor.event.web.EventEventController" method="verifyEvent" />
+	</action-method>
+
+</object-views>

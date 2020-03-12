@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.1.xsd">
+
+  <grid name="discount-grid" model="com.axelor.event.db.Discount" title="Discount">
+    <field name="beforeDays"/>
+    <field name="discountPercent"/>
+    <field name="discountAmount"/>
+  </grid>
+
+  <form name="discount-form" model="com.axelor.event.db.Discount" title="Discount">
+    <panel name="mainPanel">
+      <field name="beforeDays" onChange="action-event-condition-on-change-check-before-days" />
+      <field name="discountPercent" onChange="action-event-method-on-change-days-calculate-discount-amount"/>
+      <field name="discountAmount" readonly="true"/>
+    </panel>
+  </form>
+
+
+  <action-method name="action-event-method-on-change-calculate-discount-amount">
+      <call class="com.axelor.event.web.EventDiscountController" method="calculateDiscountAmount"/>
+  </action-method>
+
+  <action-condition name="action-event-condition-on-change-check-before-days">
+    <check field="beforeDays" if="__parent__.regOpenDate == null ||  __parent__.regCloseDate == null || __parent__.regOpenDate.plusDays(beforeDays) &gt; __parent__.regCloseDate" error="Discount Days exceed Registration End Date"/>
+  </action-condition>
+
+</object-views>

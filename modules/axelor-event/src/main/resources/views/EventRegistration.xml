@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.1.xsd">
+
+  <grid name="event-registration-grid" model="com.axelor.event.db.EventRegistration"
+    title="Event Registration">
+    <field name="event" />
+    <field name="name" />
+    <field name="email" />
+    <field name="address" />
+    <field name="regDate" />
+    <field name="amount" />
+  </grid>
+
+  <form name="event-registration-form" model="com.axelor.event.db.EventRegistration"
+    title="Event Registration"  onNew="action-event-attr-hide-event-if-parent" onLoad="action-event-attr-hide-event-if-parent" onSave="action-event-method-on-save-check-validation">
+    <panel name="mainPanel">
+      <field name="event" />
+      <field name="name" />
+      <field name="email" />
+      <field name="address" />
+      <field name="regDate" onChange="action-event-method-on-change-check-date,action-event-method-on-change-calculate-amount" />
+      <field name="amount" readonly="true" />
+    </panel>
+  </form>
+
+  <action-attrs name="action-event-attr-hide-event-if-parent">
+    <attribute name="hidden" for="event" expr="true" if="__parent__" />
+  </action-attrs>
+
+  <action-method name="action-event-method-on-change-check-date">
+  <call class="com.axelor.event.web.EventEventRegistrationController" method="checkRegistrationDate"/>
+  </action-method>
+
+  <action-method name="action-event-method-on-change-calculate-amount">
+  <call class="com.axelor.event.web.EventEventRegistrationController" method="calculateEventRegistrationAmount"/>
+  </action-method>
+
+  <action-method name="action-event-method-on-save-check-validation">
+  <call class="com.axelor.event.web.EventEventRegistrationController" method="validationForRegistrationCapacity"/>
+  </action-method>
+
+</object-views>
