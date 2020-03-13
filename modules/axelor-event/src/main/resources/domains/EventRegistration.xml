@@ -7,12 +7,12 @@
   <module package="com.axelor.event.db" name="event"/>
 
   <entity name="EventRegistration">
-    <string name="importId" title="Import Id"/>
     <many-to-one name="event" ref="com.axelor.event.db.Event" title="Event"/>
     <string name="name" title="Name"/>
-    <string name="email" title="Email"/>
+    <string name="email" title="Email" />
     <many-to-one name="address" ref="com.axelor.event.db.Address" title="Address"/>
-    <date name="regDate" title="Registration Date"/>
+    <date name="regDate" required="true" title="Registration Date"/>
     <decimal name="amount" title="Amount" />
+    <boolean name="isEmailSend" title="Email Send"/>
   </entity>
 </domain-models>

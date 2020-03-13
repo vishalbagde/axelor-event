@@ -1,12 +1,37 @@
 package com.axelor.event.service;
 
+import com.axelor.apps.message.db.Message;
+import com.axelor.apps.message.db.Template;
+import com.axelor.apps.message.db.repo.TemplateRepository;
+import com.axelor.apps.message.service.TemplateMessageService;
+import com.axelor.data.ImportTask;
+import com.axelor.data.csv.CSVImporter;
 import com.axelor.event.db.Discount;
 import com.axelor.event.db.Event;
+import com.axelor.event.db.EventRegistration;
+import com.axelor.inject.Beans;
+import com.axelor.meta.MetaFiles;
+import com.axelor.meta.db.MetaFile;
+import com.axelor.meta.db.repo.MetaFileRepository;
+import com.google.common.io.Files;
+import com.google.inject.Inject;
+import com.google.inject.persist.Transactional;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
 
 public class EventServiceImpl implements EventService {
+
+	@Inject
+	TemplateMessageService templateService;
 
 	@Override
 	public Event computeTotal(Event event) {
@@ -44,6 +69,82 @@ public class EventServiceImpl implements EventService {
 		}
 
 		event = computeTotal(event);
+		return event;
+	}
+
+	public void importCsvInEventRegistration(MetaFile metaFile, Integer event_id) {
+
+		CSVImporter importer = new CSVImporter(this.getConfigFile().getAbsolutePath());
+
+		Map<String, Object> context = new HashMap<String, Object>();
+		context.put("event", event_id.longValue());
+		importer.setContext(context);
+
+		importer.run(new ImportTask() {
+			@Override
+			public void configure() throws IOException {
+				input("[event_registration]", getDataCsvFile(metaFile));
+			}
+		});
+
+		removeMetaFile(metaFile);
+	}
+
+	@Transactional
+	public void removeMetaFile(MetaFile metaFile) {
+		Beans.get(MetaFileRepository.class).remove(metaFile);
+	}
+
+	public File getConfigFile() {
+
+		File configFile = null;
+		try {
+			configFile = File.createTempFile("input-config", ".xml");
+			InputStream is = this.getClass().getResourceAsStream("/import-configs/input-config.xml");
+			FileOutputStream os = new FileOutputStream(configFile);
+			IOUtils.copy(is, os);
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+		return configFile;
+	}
+
+	public File getDataCsvFile(MetaFile dataFile) {
+
+		File csvFile = null;
+		try {
+			File tempDir = Files.createTempDir();
+			csvFile = new File(tempDir, "eventRegistration.csv");
+			Files.copy(MetaFiles.getPath(dataFile).toFile(), csvFile);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return csvFile;
+	}
+
+	@Override
+	public Event sendEmail(Event event) {
+
+		Template template = Beans.get(TemplateRepository.class).findByName("event");
+
+		if (event.getEventRegistrationList() != null) {
+
+			List<EventRegistration> eventRegistrationList = event.getEventRegistrationList();
+			for (EventRegistration eventRegistration : eventRegistrationList) {
+				try {
+					Message message = templateService.generateAndSendMessage(eventRegistration, template);
+					if (message != null) {
+						eventRegistration.setIsEmailSend(true);
+					}
+				} catch (Exception e) {
+
+					e.printStackTrace();
+				}
+				event.setEventRegistrationList(eventRegistrationList);
+			}
+		}
 		return event;
 	}
 }

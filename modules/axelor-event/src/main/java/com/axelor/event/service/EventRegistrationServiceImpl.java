@@ -15,7 +15,6 @@ public class EventRegistrationServiceImpl implements EventRegistrationSevice {
   public EventRegistration calculateEventRegisrationAmount(
       EventRegistration eventRegistration, Event event) {
 
-	
     Period intervalPeriod = Period.between(eventRegistration.getRegDate(), event.getRegCloseDate());
     System.err.println(intervalPeriod.getDays());
 
@@ -50,4 +49,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationSevice {
       return false;
     }
   }
+  
+  
+  
+  
 }

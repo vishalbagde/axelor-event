@@ -3,3 +3,7 @@ apply plugin: 'com.axelor.app-module'
 axelor {
   title = "Axelor :: Event"
 }
+
+dependencies {
+  compile project(":modules:axelor-message")
+}

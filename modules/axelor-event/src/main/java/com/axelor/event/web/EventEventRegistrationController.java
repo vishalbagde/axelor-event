@@ -15,12 +15,19 @@ public class EventEventRegistrationController {
 	public void checkRegistrationDate(ActionRequest request, ActionResponse response) {
 		EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
 		Event event = getEvent(request, response);
-
+		/*
+		 * if (event.getRegOpenDate() == null || event.getRegCloseDate() == null ||
+		 * eventRegistration.getRegDate().isBefore(event.getRegOpenDate()) ||
+		 * eventRegistration.getRegDate().isAfter(event.getRegCloseDate()))
+		 */
 		if (event.getRegOpenDate() == null || event.getRegCloseDate() == null
-				|| eventRegistration.getRegDate().isBefore(event.getRegOpenDate())
-				|| eventRegistration.getRegDate().isAfter(event.getRegCloseDate())) {
+				|| eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) < 0
+				|| eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) > 0) {
+
 			response.setValue("regDate", null);
-			response.setFlash("Reg Date are must between Open Date And Close Date");
+
+			response.setFlash(
+					"Reg Date are must between " + event.getRegOpenDate() + " And " + event.getRegCloseDate());
 		}
 	}
 
@@ -28,7 +35,9 @@ public class EventEventRegistrationController {
 		EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
 		Event event = this.getEvent(request, response);
 
-		if (eventRegistration.getRegDate().isAfter(event.getRegOpenDate()) && eventRegistration.getRegDate().isBefore(event.getRegCloseDate())) {
+		if (eventRegistration.getRegDate() != null
+				&& (eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) >= 0)
+				&& (eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) <= 0)) {
 
 			eventRegistration = eventRegistrationService.calculateEventRegisrationAmount(eventRegistration, event);
 
@@ -42,7 +51,8 @@ public class EventEventRegistrationController {
 	public void validationForRegistrationCapacity(ActionRequest request, ActionResponse response) {
 		Event event = this.getEvent(request, response);
 		if (!eventRegistrationService.isRegistrationCapacityIsNotFull(event)) {
-			response.setError("Exceed Event Capacity");
+			response.setValue("regDate", null);
+			response.setFlash("Exceed Event Capacity");
 		}
 	}
 

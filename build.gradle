@@ -41,6 +41,9 @@ allprojects {
 dependencies {
 
   compile project(':modules:axelor-event')
+  compile project(':modules:axelor-message')
+  compile project(':modules:axelor-tool')
+  compile project(':modules:axelor-exception')
 }
 
 wrapper {

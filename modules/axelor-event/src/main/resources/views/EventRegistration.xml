@@ -11,16 +11,17 @@
     <field name="address" />
     <field name="regDate" />
     <field name="amount" />
+    <field name="isEmailSend" />
   </grid>
 
   <form name="event-registration-form" model="com.axelor.event.db.EventRegistration"
-    title="Event Registration"  onNew="action-event-attr-hide-event-if-parent" onLoad="action-event-attr-hide-event-if-parent" onSave="action-event-method-on-save-check-validation">
+    title="Event Registration"  onNew="action-event-attr-hide-event-if-parent"  onLoad="action-event-attr-hide-event-if-parent" onSave="action-event-method-on-save-check-validation">
     <panel name="mainPanel">
       <field name="event" />
       <field name="name" />
-      <field name="email" />
+      <field name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" />
       <field name="address" />
-      <field name="regDate" onChange="action-event-method-on-change-check-date,action-event-method-on-change-calculate-amount" />
+      <field name="regDate" onChange="action-event-method-on-change-check-date,action-event-method-on-change-calculate-amount,action-event-method-on-save-check-validation" />
       <field name="amount" readonly="true" />
     </panel>
   </form>
