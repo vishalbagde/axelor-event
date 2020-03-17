@@ -19,13 +19,13 @@
   </grid>
 
   <form model="com.axelor.event.db.Event" title="Event" name="event-form"
-    width="large" onLoad="action-event-method-on-change-verify-event,save" >
+    width="large" onLoad="action-event-method-on-change-verify-event,save">
     <toolbar>
       <button name="eventRegImportBtn" title="Import registration"
         showIf="id" onClick="action-event-view-import-event-registration" />
 
       <button name="emailSendBtn" title="Email Send" showIf="id"
-        onClick="action-event-method-on-click-send-email" />
+        onClick="action-event-method-on-click-send-email,save" />
 
       <button name="reportBtn" title="Report" showIf="id"
         onClick="action-event-report-on-click-generate-report" />
@@ -49,8 +49,8 @@
 
     <panel name="eventRegPenel">
       <panel-related field="eventRegistrationList" colSpan="12"
-        form-view="event-registration-form" grid-view="event-registration-grid"
-        onChange="action-event-method-on-change-compute-event-total" />
+        form-view="event-registration-form" grid-view="event-registration-event-grid"
+        onChange="action-event-method-on-change-compute-event-total,save" />
     </panel>
 
     <panel name="descPanel" colSpan="12">
@@ -65,7 +65,8 @@
     </panel>
   </form>
 
-  <cards name="event-card" model="com.axelor.event.db.Event" title="Event" width="400px">
+  <cards name="event-card" model="com.axelor.event.db.Event" title="Event"
+    width="400px">
     <field name="reference" />
     <field name="startDate" />
     <field name="endDate" />
@@ -83,7 +84,7 @@
         <div span="12">
          <h4> <span class="label label-info pull-right"> {{startDate | date:'dd-MM-yyyy'}} - {{endDate | date:'dd-MM-yyyy'}}</span> </h4>
          <h4 class="text-primary"><strong>{{reference}}</strong></h4>
-        
+
           <div span="4">
             <b class="text-info">Venue :</b> {{venue.fullName}}<br>
             <b class="text-info">Event Fees :</b> {{eventFees}}<br>
@@ -106,7 +107,7 @@
 
 
   <form name="import-registration-form" title="Import Registration"
-    model="com.axelor.event.db.Event" >
+    model="com.axelor.event.db.Event">
     <panel name="mainPanel">
       <field name="metaFile" title="Input file" type="many-to-one"
         target="com.axelor.meta.db.MetaFile" widget="binary-link" />
@@ -118,17 +119,15 @@
   <action-view name="action-event-view-import-event-registration"
     title="Import Registration" model="com.axelor.event.db.Event">
     <view type="form" name="import-registration-form" />
-    <view-param name="width" value="800"/>
-      <view-param name="popup" value="true"/>
-      	<view-param name="show-toolbar" value="false"/>
-      <view-param name="show-confirm" value="false"/>
-      <view-param name="popup-save" value="false"/>
+    <view-param name="width" value="800" />
+    <view-param name="popup" value="true" />
+    <view-param name="show-toolbar" value="false" />
+    <view-param name="show-confirm" value="false" />
+    <view-param name="popup-save" value="false" />
   </action-view>
   <action-method name="action-event-method-on-click-import-registration">
     <call class="com.axelor.event.web.EventEventController" method="importCsvEventRegistration" />
   </action-method>
-
-
 
 
   <action-condition name="action-event-condition-on-change-check-date">
@@ -145,10 +144,9 @@
       error="Registration Start Date didn't After Start Date or not after Registration End Date" />
 
     <check field="regCloseDate"
-      if="regOpenDate !=null &amp;&amp; regCloseDate !=null &amp;&amp; regCloseDate &gt; startDate.toLocalDate()  || regOpenDate !=null &amp;&amp; regCloseDate !=null &amp;&amp; regCloseDate &lt; regOpenDate"
+      if="regOpenDate !=null &amp;&amp; regCloseDate !=null &amp;&amp; regCloseDate &gt;= startDate.toLocalDate()  || regOpenDate !=null &amp;&amp; regCloseDate !=null &amp;&amp; regCloseDate &lt; regOpenDate"
       error="Registration Close Date didn't After End Date or not Before Reg Start Date" />
   </action-condition>
-
 
   <action-method name="action-event-method-on-change-compute-event-total">
     <call class="com.axelor.event.web.EventEventController" method="computeTotal" />
@@ -161,9 +159,6 @@
   <action-method name="action-event-method-on-click-send-email">
     <call class="com.axelor.event.web.EventEventController" method="emailSend" />
   </action-method>
-
-
-
 
   <action-report output="${date}${time}"
     name="action-event-report-on-click-generate-report" design="event_report.rptdesign">

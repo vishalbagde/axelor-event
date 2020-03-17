@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class EventRegistrationServiceImpl implements EventRegistrationSevice {
 
   @Override
-  public EventRegistration calculateEventRegisrationAmount(
+  public BigDecimal getEventRegisrationDiscountAmount(
       EventRegistration eventRegistration, Event event) {
 
     Period intervalPeriod = Period.between(eventRegistration.getRegDate(), event.getRegCloseDate());
@@ -37,20 +37,18 @@ public class EventRegistrationServiceImpl implements EventRegistrationSevice {
         }
       }
     }
-
-    eventRegistration.setAmount(event.getEventFees().subtract(discountAmount));
-    return eventRegistration;
+    return discountAmount;
   }
 
   public boolean isRegistrationCapacityIsNotFull(Event event) {
-    if (event.getCapacity() > event.getEventRegistrationList().size()) {
+    Integer registrationSize = 0;
+    if (event.getEventRegistrationList() != null) {
+      registrationSize = event.getEventRegistrationList().size();
+    }
+    if (event.getCapacity() > registrationSize) {
       return true;
     } else {
       return false;
     }
   }
-  
-  
-  
-  
 }

@@ -2,6 +2,8 @@ package com.axelor.event.web;
 
 import com.axelor.event.db.Discount;
 import com.axelor.event.db.Event;
+import com.axelor.event.exception.IExceptionEvent;
+import com.axelor.i18n.I18n;
 import com.axelor.rpc.ActionRequest;
 import com.axelor.rpc.ActionResponse;
 import java.math.BigDecimal;
@@ -16,7 +18,7 @@ public class EventDiscountController {
           "discountAmount",
           event.getEventFees().multiply(discount.getDiscountPercent()).divide(new BigDecimal(100)));
     } else {
-      response.setError("Invalid Days or percentage");
+      response.setError(I18n.get(IExceptionEvent.ERROR_INVALID_DAYS_OR_PERCENTAGE));
     }
   }
 }

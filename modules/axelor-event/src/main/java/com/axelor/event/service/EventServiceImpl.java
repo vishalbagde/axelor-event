@@ -5,11 +5,12 @@ import com.axelor.apps.message.db.Template;
 import com.axelor.apps.message.db.repo.TemplateRepository;
 import com.axelor.apps.message.service.TemplateMessageService;
 import com.axelor.data.ImportTask;
+import com.axelor.data.Listener;
 import com.axelor.data.csv.CSVImporter;
+import com.axelor.db.Model;
 import com.axelor.event.db.Discount;
 import com.axelor.event.db.Event;
 import com.axelor.event.db.EventRegistration;
-import com.axelor.inject.Beans;
 import com.axelor.meta.MetaFiles;
 import com.axelor.meta.db.MetaFile;
 import com.axelor.meta.db.repo.MetaFileRepository;
@@ -25,126 +26,152 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
 
 public class EventServiceImpl implements EventService {
 
-	@Inject
-	TemplateMessageService templateService;
+  @Inject TemplateMessageService templateService;
 
-	@Override
-	public Event computeTotal(Event event) {
+  @Inject MetaFileRepository metaFileRepository;
+  
+  @Inject TemplateRepository templateRepository;
 
-		Integer totalEntry = 0;
-		BigDecimal totalCollection = BigDecimal.ZERO;
-		BigDecimal totalDiscount = BigDecimal.ZERO;
+  @Override
+  public Event computeTotal(Event event) {
 
-		if (event.getEventRegistrationList() != null) {
-			totalEntry = event.getEventRegistrationList().size();
-			totalCollection = event.getEventRegistrationList().stream().map(x -> x.getAmount()).reduce(BigDecimal.ZERO,
-					BigDecimal::add);
-			totalDiscount = event.getEventFees().multiply(new BigDecimal(totalEntry)).subtract(totalCollection);
+    Integer totalEntry = 0;
+    BigDecimal totalCollection = BigDecimal.ZERO;
+    BigDecimal totalDiscount = BigDecimal.ZERO;
 
-			event.setAmountCollected(totalCollection);
-			event.setTotalDiscount(totalDiscount);
-			event.setTotalEntry(event.getEventRegistrationList().size());
-		}
-		return event;
-	}
+    if (event.getEventRegistrationList() != null) {
+      totalEntry = event.getEventRegistrationList().size();
+      totalCollection =
+          event
+              .getEventRegistrationList()
+              .stream()
+              .map(x -> x.getAmount())
+              .reduce(BigDecimal.ZERO, BigDecimal::add);
+      totalDiscount =
+          event.getEventFees().multiply(new BigDecimal(totalEntry)).subtract(totalCollection);
 
-	@Override
-	public Event verifyEvent(Event event) {
+      event.setAmountCollected(totalCollection);
+      event.setTotalDiscount(totalDiscount);
+      event.setTotalEntry(event.getEventRegistrationList().size());
+    }
+    return event;
+  }
 
-		if (event.getDiscountList() != null) {
-			List<Discount> discountList = event.getDiscountList();
-			List<Discount> updatedDiscountList = new ArrayList<>();
+  @Override
+  public Event verifyEvent(Event event) {
 
-			for (Discount discount : discountList) {
-				discount.setDiscountAmount(
-						event.getEventFees().multiply(discount.getDiscountPercent()).divide(new BigDecimal(100)));
-				updatedDiscountList.add(discount);
-			}
-			event.setDiscountList(updatedDiscountList);
-		}
+    if (event.getDiscountList() != null) {
+      List<Discount> discountList = event.getDiscountList();
+      List<Discount> updatedDiscountList = new ArrayList<>();
 
-		event = computeTotal(event);
-		return event;
-	}
+      for (Discount discount : discountList) {
+        discount.setDiscountAmount(
+            event
+                .getEventFees()
+                .multiply(discount.getDiscountPercent())
+                .divide(new BigDecimal(100)));
+        updatedDiscountList.add(discount);
+      }
+      event.setDiscountList(updatedDiscountList);
+    }
 
-	public void importCsvInEventRegistration(MetaFile metaFile, Integer event_id) {
+    event = computeTotal(event);
+    return event;
+  }
 
-		CSVImporter importer = new CSVImporter(this.getConfigFile().getAbsolutePath());
+  public void importCsvInEventRegistration(MetaFile metaFile, Integer event_id) {
 
-		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("event", event_id.longValue());
-		importer.setContext(context);
+    CSVImporter importer =
+        new CSVImporter(
+            this.getConfigFile().getAbsolutePath());
+    Map<String, Object> context = new HashMap<String, Object>();
+    context.put("event_id", event_id.longValue());
+    
+    importer.setContext(context);
 
-		importer.run(new ImportTask() {
-			@Override
-			public void configure() throws IOException {
-				input("[event_registration]", getDataCsvFile(metaFile));
-			}
-		});
+    importer.addListener(
+        new Listener() {
 
-		removeMetaFile(metaFile);
-	}
+          @Override
+          public void imported(Integer total, Integer success) {
+            System.err.println("Total data import" + total);
+          }
 
-	@Transactional
-	public void removeMetaFile(MetaFile metaFile) {
-		Beans.get(MetaFileRepository.class).remove(metaFile);
-	}
+          @Override
+          public void imported(Model bean) {}
 
-	public File getConfigFile() {
+          @Override
+          public void handle(Model bean, Exception e) {}
+        });
 
-		File configFile = null;
-		try {
-			configFile = File.createTempFile("input-config", ".xml");
-			InputStream is = this.getClass().getResourceAsStream("/import-configs/input-config.xml");
-			FileOutputStream os = new FileOutputStream(configFile);
-			IOUtils.copy(is, os);
-		} catch (IOException e) {
+    importer.run(
+        new ImportTask() {
+          @Override
+          public void configure() throws IOException {
+            input("[event_registration]", getDataCsvFile(metaFile));
+          }
+        });
 
-			e.printStackTrace();
-		}
-		return configFile;
-	}
+    removeMetaFile(metaFile);
+  }
 
-	public File getDataCsvFile(MetaFile dataFile) {
+  @Transactional
+  public void removeMetaFile(MetaFile metaFile) {
+    metaFileRepository.remove(metaFile);
+  }
 
-		File csvFile = null;
-		try {
-			File tempDir = Files.createTempDir();
-			csvFile = new File(tempDir, "eventRegistration.csv");
-			Files.copy(MetaFiles.getPath(dataFile).toFile(), csvFile);
+  public File getConfigFile() {
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return csvFile;
-	}
+    File configFile = null;
+    try {
+      configFile = File.createTempFile("input-config", ".xml");
+      InputStream is = this.getClass().getResourceAsStream("/import-configs/input-config.xml");
+      FileOutputStream os = new FileOutputStream(configFile);
+      IOUtils.copy(is, os);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return configFile;
+  }
 
-	@Override
-	public Event sendEmail(Event event) {
+  public File getDataCsvFile(MetaFile dataFile) {
 
-		Template template = Beans.get(TemplateRepository.class).findByName("event");
+    File csvFile = null;
+    try {
+      File tempDir = Files.createTempDir();
+      csvFile = new File(tempDir, "eventRegistration.csv");
+      Files.copy(MetaFiles.getPath(dataFile).toFile(), csvFile);
 
-		if (event.getEventRegistrationList() != null) {
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return csvFile;
+  }
 
-			List<EventRegistration> eventRegistrationList = event.getEventRegistrationList();
-			for (EventRegistration eventRegistration : eventRegistrationList) {
-				try {
-					Message message = templateService.generateAndSendMessage(eventRegistration, template);
-					if (message != null) {
-						eventRegistration.setIsEmailSend(true);
-					}
-				} catch (Exception e) {
+  @Override
+  public Event sendEmail(Event event) {
 
-					e.printStackTrace();
-				}
-				event.setEventRegistrationList(eventRegistrationList);
-			}
-		}
-		return event;
-	}
+    Template template = templateRepository.findByName("event");
+
+    if (event.getEventRegistrationList() != null) {
+
+      List<EventRegistration> eventRegistrationList = event.getEventRegistrationList();
+      for (EventRegistration eventRegistration : eventRegistrationList) {
+        try {
+          Message message = templateService.generateAndSendMessage(eventRegistration, template);
+          if (message != null) {
+            eventRegistration.setIsEmailSend(true);
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        event.setEventRegistrationList(eventRegistrationList);
+      }
+    }
+    return event;
+  }
 }

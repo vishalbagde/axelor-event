@@ -7,22 +7,19 @@ import com.axelor.meta.db.MetaFile;
 import com.axelor.meta.db.repo.MetaFileRepository;
 import com.axelor.rpc.ActionRequest;
 import com.axelor.rpc.ActionResponse;
-import com.google.inject.Inject;
 import java.util.LinkedHashMap;
 
 public class EventEventController {
 
-  @Inject EventService eventService;
-
   public void computeTotal(ActionRequest request, ActionResponse response) {
     Event event = request.getContext().asType(Event.class);
-    event = eventService.computeTotal(event);
+    event = Beans.get(EventService.class).computeTotal(event);
     response.setValues(event);
   }
 
   public void verifyEvent(ActionRequest request, ActionResponse response) {
     Event event = request.getContext().asType(Event.class);
-    event = eventService.verifyEvent(event);
+    event = Beans.get(EventService.class).verifyEvent(event);
 
     response.setValue("discountList", event.getDiscountList());
     response.setValue("eventRegistrationList", event.getEventRegistrationList());
@@ -34,7 +31,8 @@ public class EventEventController {
     // response.setValues(event);
   }
 
-  public void importCsvEventRegistration(ActionRequest request, ActionResponse response) {
+  @SuppressWarnings("unchecked")
+public void importCsvEventRegistration(ActionRequest request, ActionResponse response) {
 
     Integer event_id = (Integer) request.getContext().get("_id");
 
@@ -49,9 +47,11 @@ public class EventEventController {
     } else {
       response.setError("Invalid File Type");
     }
-    response.setFlash("CSV DATA Import Successful");   
+
+    response.setFlash("CSV DATA Import Successful");
     response.setCanClose(true);
-    
+    // response.setReload(true);
+
   }
 
   public void emailSend(ActionRequest request, ActionResponse response) {

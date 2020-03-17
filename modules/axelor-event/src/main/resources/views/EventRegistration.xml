@@ -5,7 +5,18 @@
 
   <grid name="event-registration-grid" model="com.axelor.event.db.EventRegistration"
     title="Event Registration">
-    <field name="event" />
+    <field name="event"/>
+    <field name="name" />
+    <field name="email" />
+    <field name="address" />
+    <field name="regDate" />
+    <field name="amount" />
+    <field name="isEmailSend" />
+  </grid>
+
+
+  <grid name="event-registration-event-grid" model="com.axelor.event.db.EventRegistration"
+    title="Event Registration">
     <field name="name" />
     <field name="email" />
     <field name="address" />

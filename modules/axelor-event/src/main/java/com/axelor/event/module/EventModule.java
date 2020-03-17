@@ -3,6 +3,8 @@ package com.axelor.event.module;
 import com.axelor.app.AxelorModule;
 import com.axelor.event.db.repo.AddressRepo;
 import com.axelor.event.db.repo.AddressRepository;
+import com.axelor.event.db.repo.EventRegistrationRepo;
+import com.axelor.event.db.repo.EventRegistrationRepository;
 import com.axelor.event.service.EventRegistrationServiceImpl;
 import com.axelor.event.service.EventRegistrationSevice;
 import com.axelor.event.service.EventService;
@@ -14,6 +16,7 @@ public class EventModule extends AxelorModule {
   protected void configure() {
 
     bind(AddressRepository.class).to(AddressRepo.class);
+    bind(EventRegistrationRepository.class).to(EventRegistrationRepo.class);
     bind(EventRegistrationSevice.class).to(EventRegistrationServiceImpl.class);
     bind(EventService.class).to(EventServiceImpl.class);
   }

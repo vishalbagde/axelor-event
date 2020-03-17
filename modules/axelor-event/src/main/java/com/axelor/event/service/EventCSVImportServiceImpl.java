@@ -1,38 +1,48 @@
 package com.axelor.event.service;
 
-import java.util.Map;
 import com.axelor.event.db.Event;
 import com.axelor.event.db.EventRegistration;
 import com.axelor.event.db.repo.EventRepository;
 import com.axelor.inject.Beans;
 import com.google.inject.Inject;
+import java.util.Map;
 
 public class EventCSVImportServiceImpl {
 
-	@Inject
-	EventRegistrationSevice eventRegistrationService;
+  @Inject EventRegistrationSevice eventRegistrationService;
 
-	public Object importRegistrationData(Object bean, Map<String, Object> values) {
+  static int capacityCounter = 0;
 
-		assert bean instanceof EventRegistration;
-		EventRegistration eventRegistration = (EventRegistration) bean;
-		Event event = (Beans.get(EventRepository.class).find(Long.parseLong(values.get("event").toString())));
-		if (eventRegistrationService.isRegistrationCapacityIsNotFull(event)) {
+  public Object importRegistrationData(Object bean, Map<String, Object> values) {
 
-			if (event.getRegOpenDate() != null && event.getRegCloseDate() != null
-					&& (!eventRegistration.getRegDate().isBefore(event.getRegOpenDate())
-							&& !eventRegistration.getRegDate().isAfter(event.getRegCloseDate()))) {
+    assert bean instanceof EventRegistration;
+    EventRegistration eventRegistration = (EventRegistration) bean;
+    Event event =
+        (Beans.get(EventRepository.class).find(Long.parseLong(values.get("event_id").toString())));
 
-				eventRegistration = eventRegistrationService.calculateEventRegisrationAmount(eventRegistration, event);
-				eventRegistration.setEvent(event);
-			} else {
-				System.err.println("Invalid Registration Date");
-			}
-		} else {
-			System.err.println("Capacity is exceed");
-		}
+    if (event.getCapacity() > (event.getEventRegistrationList().size() + capacityCounter)) {
+      capacityCounter++;
+      if (event.getRegOpenDate() != null
+          && event.getRegCloseDate() != null
+          && (!eventRegistration.getRegDate().isBefore(event.getRegOpenDate())
+              && !eventRegistration.getRegDate().isAfter(event.getRegCloseDate()))) {
 
-		return eventRegistration;
-	}
+        eventRegistration.setAmount(
+            event
+                .getEventFees()
+                .subtract(
+                    eventRegistrationService.getEventRegisrationDiscountAmount(
+                        eventRegistration, event)));
 
+        eventRegistration.setEvent(event);
+        return eventRegistration;
+      } else {
+        System.err.println("Invalid Registration Date");
+      }
+    } else {
+      capacityCounter = 0;
+      System.err.println("Capacity is exceed");
+    }
+    return null;
+  }
 }
