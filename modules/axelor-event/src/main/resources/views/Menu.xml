@@ -22,7 +22,7 @@
     title="Event Registration" action="menu.action.event.registration.view.all" />
 
   <action-view name="menu.action.event.registration.view.all"
-    title="Event" model="com.axelor.event.db.EventRegistration">
+    title="Event Registration" model="com.axelor.event.db.EventRegistration">
     <view type="grid" name="event-registration-grid" />
     <view type="form" name="event-registration-form" />
   </action-view>

@@ -32,8 +32,8 @@
 
     </toolbar>
     <panel name="overviewPanel">
-      <field name="reference" />
-      <field name="venue" />
+      <field name="reference"/>
+      <field name="venue"/>
       <field name="startDate" onChange="action-event-condition-on-change-check-date" />
       <field name="endDate" onChange="action-event-condition-on-change-check-date" />
       <field name="regOpenDate" onChange="action-event-condition-on-change-check-date" />
@@ -48,9 +48,9 @@
     </panel>
 
     <panel name="eventRegPenel">
-      <panel-related field="eventRegistrationList" colSpan="12"
+      <panel-related field="eventRegistrationList" colSpan="12" canNew="capacity > totalEntry"
         form-view="event-registration-form" grid-view="event-registration-event-grid"
-        onChange="action-event-method-on-change-compute-event-total,save" />
+        onChange="action-event-method-on-change-compute-event-total" />
     </panel>
 
     <panel name="descPanel" colSpan="12">
@@ -105,9 +105,8 @@
     <field name="venue" />
   </calendar>
 
-
   <form name="import-registration-form" title="Import Registration"
-    model="com.axelor.event.db.Event">
+    model="com.axelor.event.db.Wizards">
     <panel name="mainPanel">
       <field name="metaFile" title="Input file" type="many-to-one"
         target="com.axelor.meta.db.MetaFile" widget="binary-link" />
@@ -117,7 +116,7 @@
   </form>
 
   <action-view name="action-event-view-import-event-registration"
-    title="Import Registration" model="com.axelor.event.db.Event">
+    title="Import Registration" model="com.axelor.event.db.Wizards">
     <view type="form" name="import-registration-form" />
     <view-param name="width" value="800" />
     <view-param name="popup" value="true" />
@@ -129,41 +128,39 @@
     <call class="com.axelor.event.web.EventEventController" method="importCsvEventRegistration" />
   </action-method>
 
-
   <action-condition name="action-event-condition-on-change-check-date">
 
-    <check field="startDate" if="endDate !=null &amp;&amp; startDate &gt; endDate"
-      error="Start Date didn't After End Date" />
+    <check field="startDate" if="startDate == null || endDate !=null &amp;&amp; startDate &gt; endDate"
+      error="Start Date should not After End Date" />
 
     <check field="endDate"
-      if="startDate !=null &amp;&amp; endDate !=null &amp;&amp;  endDate &lt; startDate"
-      error="End Date didn't Before Start Date" />
+      if="endDate == null || startDate !=null &amp;&amp;  endDate &lt; startDate"
+      error="End Date should not Before Start Date" />
 
     <check field="regOpenDate"
       if="regCloseDate !=null &amp;&amp; regOpenDate &gt; startDate.toLocalDate() || regOpenDate !=null &amp;&amp; regOpenDate &gt; regCloseDate"
-      error="Registration Start Date didn't After Start Date or not after Registration End Date" />
+      error="Registration Start Date should not After Start Date or not after Registration End Date" />
 
     <check field="regCloseDate"
-      if="regOpenDate !=null &amp;&amp; regCloseDate !=null &amp;&amp; regCloseDate &gt;= startDate.toLocalDate()  || regOpenDate !=null &amp;&amp; regCloseDate !=null &amp;&amp; regCloseDate &lt; regOpenDate"
-      error="Registration Close Date didn't After End Date or not Before Reg Start Date" />
+      if="regOpenDate !=null &amp;&amp; regCloseDate !=null &amp;&amp; regCloseDate &gt;= startDate.toLocalDate()  || regOpenDate !=null &amp;&amp; regCloseDate &lt; regOpenDate"
+      error="Registration Close Date should After End Date or not Before Reg Start Date" />
   </action-condition>
 
   <action-method name="action-event-method-on-change-compute-event-total">
-    <call class="com.axelor.event.web.EventEventController" method="computeTotal" />
+    <call class="com.axelor.event.web.EventEventController" method="computeTotal"/>
   </action-method>
 
   <action-method name="action-event-method-on-change-verify-event">
-    <call class="com.axelor.event.web.EventEventController" method="verifyEvent" />
+    <call class="com.axelor.event.web.EventEventController" method="verifyEvent"/>
   </action-method>
 
   <action-method name="action-event-method-on-click-send-email">
-    <call class="com.axelor.event.web.EventEventController" method="emailSend" />
+    <call class="com.axelor.event.web.EventEventController" method="emailSend"/>
   </action-method>
 
   <action-report output="${date}${time}"
     name="action-event-report-on-click-generate-report" design="event_report.rptdesign">
-    <param name="eventId" expr="eval: id" />
+    <param name="eventId" expr="eval: id"/>
   </action-report>
-
 
 </object-views>

@@ -5,7 +5,7 @@
 
   <grid name="event-registration-grid" model="com.axelor.event.db.EventRegistration"
     title="Event Registration">
-    <field name="event"/>
+    <field name="event" />
     <field name="name" />
     <field name="email" />
     <field name="address" />
@@ -26,13 +26,16 @@
   </grid>
 
   <form name="event-registration-form" model="com.axelor.event.db.EventRegistration"
-    title="Event Registration"  onNew="action-event-attr-hide-event-if-parent"  onLoad="action-event-attr-hide-event-if-parent" onSave="action-event-method-on-save-check-validation">
+    title="Event Registration" onNew="action-event-attr-hide-event-if-parent"
+    onLoad="action-event-attr-hide-event-if-parent" onSave="action-event-method-on-save-check-validation">
     <panel name="mainPanel">
-      <field name="event" />
+      <field name="event"
+        onChange="action-event-registration-condition-on-change-check-event,action-event-registration-attr-clear-reg-date" />
       <field name="name" />
       <field name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" />
       <field name="address" />
-      <field name="regDate" onChange="action-event-method-on-change-check-date,action-event-method-on-change-calculate-amount,action-event-method-on-save-check-validation" />
+      <field name="regDate"
+        onChange="action-event-registration-condition-on-change-check-event,action-event-registration-group-on-change-regDate-set-data" />
       <field name="amount" readonly="true" />
     </panel>
   </form>
@@ -41,16 +44,38 @@
     <attribute name="hidden" for="event" expr="true" if="__parent__" />
   </action-attrs>
 
+  <action-attrs name="action-event-registration-attr-clear-reg-date">
+    <attribute name="value" for="regDate" expr="" />
+  </action-attrs>
+
   <action-method name="action-event-method-on-change-check-date">
-  <call class="com.axelor.event.web.EventEventRegistrationController" method="checkRegistrationDate"/>
+    <call class="com.axelor.event.web.EventEventRegistrationController"
+      method="checkRegistrationDate" />
   </action-method>
 
   <action-method name="action-event-method-on-change-calculate-amount">
-  <call class="com.axelor.event.web.EventEventRegistrationController" method="calculateEventRegistrationAmount"/>
+    <call class="com.axelor.event.web.EventEventRegistrationController"
+      method="calculateEventRegistrationAmount" />
   </action-method>
 
   <action-method name="action-event-method-on-save-check-validation">
-  <call class="com.axelor.event.web.EventEventRegistrationController" method="validationForRegistrationCapacity"/>
+    <call class="com.axelor.event.web.EventEventRegistrationController"
+      method="validationForRegistrationCapacity" />
   </action-method>
+
+
+  <action-group
+    name="action-event-registration-group-on-change-regDate-set-data">
+    <action name="action-event-method-on-change-check-date" />
+    <action name="action-event-method-on-change-calculate-amount"
+      if="regDate" />
+    <action name="action-event-method-on-save-check-validation" />
+  </action-group>
+
+
+  <action-condition
+    name="action-event-registration-condition-on-change-check-event" >
+    <check field="event" if="!__parent__  &amp;&amp;  event == null" error="Invalid Event please select Event" />
+  </action-condition>
 
 </object-views>

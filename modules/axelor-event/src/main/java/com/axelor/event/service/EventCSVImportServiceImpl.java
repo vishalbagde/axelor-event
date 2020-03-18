@@ -20,7 +20,8 @@ public class EventCSVImportServiceImpl {
     Event event =
         (Beans.get(EventRepository.class).find(Long.parseLong(values.get("event_id").toString())));
 
-    if (event.getCapacity() > (event.getEventRegistrationList().size() + capacityCounter)) {
+    if (event.getCapacity()
+        > (Integer.parseInt(values.get("reg_list_size").toString()) + capacityCounter)) {
       capacityCounter++;
       if (event.getRegOpenDate() != null
           && event.getRegCloseDate() != null

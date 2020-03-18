@@ -8,7 +8,7 @@ public interface EventService {
 
   public Event verifyEvent(Event event);
 
-  public Event sendEmail(Event event);
+  public void sendEmail(Event event);
 
   public void importCsvInEventRegistration(MetaFile metaFile, Integer event_id);
 }

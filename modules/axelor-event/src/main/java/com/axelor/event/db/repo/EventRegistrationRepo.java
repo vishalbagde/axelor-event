@@ -3,6 +3,7 @@ package com.axelor.event.db.repo;
 import com.axelor.event.db.Event;
 import com.axelor.event.db.EventRegistration;
 import com.google.inject.Inject;
+import java.math.BigDecimal;
 
 public class EventRegistrationRepo extends EventRegistrationRepository {
 
@@ -12,9 +13,12 @@ public class EventRegistrationRepo extends EventRegistrationRepository {
   public void remove(EventRegistration entity) {
     super.remove(entity);
     Event event = entity.getEvent();
+
+    BigDecimal discount = event.getEventFees().subtract(entity.getAmount());
     event.setTotalEntry(event.getTotalEntry() - 1);
     event.setAmountCollected(event.getAmountCollected().subtract(entity.getAmount()));
-    event.setTotalDiscount(event.getTotalDiscount().subtract(event.getEventFees()));
+    event.setTotalDiscount(event.getTotalDiscount().subtract(discount));
+
     eventRepo.save(event);
   }
 }

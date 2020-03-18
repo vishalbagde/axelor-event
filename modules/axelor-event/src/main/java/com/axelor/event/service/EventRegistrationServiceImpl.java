@@ -20,13 +20,17 @@ public class EventRegistrationServiceImpl implements EventRegistrationSevice {
 
     BigDecimal discountAmount = BigDecimal.ZERO;
 
-    if (event.getDiscountList() != null || !event.getDiscountList().isEmpty()) {
+    List<Discount> discountList = event.getDiscountList();
 
-      List<Discount> discountList =
+    if (discountList != null && !discountList.isEmpty()) {
+      discountList =
           event
               .getDiscountList()
               .stream()
-              .sorted(Comparator.comparing(Discount::getBeforeDays).reversed())
+              .sorted(
+                  Comparator.comparing(Discount::getBeforeDays)
+                      .reversed()
+                      .thenComparing(Comparator.comparing(Discount::getDiscountPercent).reversed()))
               .collect(Collectors.toList());
 
       for (Discount discount : discountList) {
@@ -42,8 +46,9 @@ public class EventRegistrationServiceImpl implements EventRegistrationSevice {
 
   public boolean isRegistrationCapacityIsNotFull(Event event) {
     Integer registrationSize = 0;
-    if (event.getEventRegistrationList() != null) {
-      registrationSize = event.getEventRegistrationList().size();
+    List<EventRegistration> eventRegistrationList = event.getEventRegistrationList();
+    if (eventRegistrationList != null) {
+      registrationSize = eventRegistrationList.size();
     }
     if (event.getCapacity() > registrationSize) {
       return true;

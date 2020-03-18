@@ -32,11 +32,10 @@ public class EventEventController {
   }
 
   @SuppressWarnings("unchecked")
-public void importCsvEventRegistration(ActionRequest request, ActionResponse response) {
+  public void importCsvEventRegistration(ActionRequest request, ActionResponse response) {
 
     Integer event_id = (Integer) request.getContext().get("_id");
 
-    request.getContext().asType(Event.class);
     LinkedHashMap<String, Object> map =
         (LinkedHashMap<String, Object>) request.getContext().get("metaFile");
 
@@ -56,8 +55,9 @@ public void importCsvEventRegistration(ActionRequest request, ActionResponse res
 
   public void emailSend(ActionRequest request, ActionResponse response) {
     Event event = request.getContext().asType(Event.class);
-    event = Beans.get(EventService.class).sendEmail(event);
-    response.setValue("eventRegistrationList", event.getEventRegistrationList());
+    Beans.get(EventService.class).sendEmail(event);
+
     response.setFlash("Email Send Successful");
+    response.setReload(true);
   }
 }

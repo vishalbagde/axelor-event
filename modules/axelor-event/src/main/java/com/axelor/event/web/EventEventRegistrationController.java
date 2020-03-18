@@ -12,71 +12,79 @@ import java.math.BigDecimal;
 
 public class EventEventRegistrationController {
 
-	public void checkRegistrationDate(ActionRequest request, ActionResponse response) {
-		EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
-		Event event = null;
-		if (request.getContext().getParent() != null) {
-			event = request.getContext().getParent().asType(Event.class);
-		} else {
-			event = eventRegistration.getEvent();
-		}
+  public void checkRegistrationDate(ActionRequest request, ActionResponse response) {
+    EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
+    Event event = null;
+    if (request.getContext().getParent() != null) {
+      event = request.getContext().getParent().asType(Event.class);
+    } else {
+      event = eventRegistration.getEvent();
+    }
+    if (event != null) {
+      if (event.getRegOpenDate() == null
+          || event.getRegCloseDate() == null
+          || eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) < 0
+          || eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) > 0) {
 
-		if (event != null) {
-			if (event.getRegOpenDate() == null || event.getRegCloseDate() == null
-					|| eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) < 0
-					|| eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) > 0) {
+        response.setValue("regDate", null);
+        response.setValue("amount", BigDecimal.ZERO);
 
-				response.setValue("regDate", null);
-				response.setValue("amount", BigDecimal.ZERO);
+        response.setFlash(
+            "Reg Date are must between "
+                + event.getRegOpenDate()
+                + " And "
+                + event.getRegCloseDate());
+      }
+    }
+  }
 
-				response.setFlash(
-						"Reg Date are must between " + event.getRegOpenDate() + " And " + event.getRegCloseDate());
-			}
-		}
-	}
+  public void calculateEventRegistrationAmount(ActionRequest request, ActionResponse response) {
+    EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
+    Event event;
+    if (request.getContext().getParent() != null) {
+      event = request.getContext().getParent().asType(Event.class);
+    } else {
+      event = eventRegistration.getEvent();
+    }
 
-	public void calculateEventRegistrationAmount(ActionRequest request, ActionResponse response) {
-		EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
-		Event event;
-		if (request.getContext().getParent() != null) {
-			event = request.getContext().getParent().asType(Event.class);
-		} else {
-			event = eventRegistration.getEvent();
-		}
+    if (event != null) {
+      if (eventRegistration.getRegDate() != null
+          && (eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) >= 0)
+          && (eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) <= 0)) {
 
-		if (event != null) {
-			if (eventRegistration.getRegDate() != null
-					&& (eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) >= 0)
-					&& (eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) <= 0)) {
+        eventRegistration.setAmount(
+            event
+                .getEventFees()
+                .subtract(
+                    Beans.get(EventRegistrationSevice.class)
+                        .getEventRegisrationDiscountAmount(eventRegistration, event)));
+        response.setValues(eventRegistration);
+      } else {
+        response.setError(I18n.get(IExceptionEvent.ERROR_INVALID_DATE));
+      }
+    }
+  }
 
-				eventRegistration.setAmount(event.getEventFees().subtract(Beans.get(EventRegistrationSevice.class)
-						.getEventRegisrationDiscountAmount(eventRegistration, event)));
-				response.setValues(eventRegistration);
-			} else {
-				response.setError(I18n.get(IExceptionEvent.ERROR_INVALID_DATE));
-			}
-		}
-	}
+  public void validationForRegistrationCapacity(ActionRequest request, ActionResponse response) {
 
-	public void validationForRegistrationCapacity(ActionRequest request, ActionResponse response) {
+    EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
 
-		EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
-		
-		if (eventRegistration.getId() == null) {
-			
-			Event event = null;
-			if (request.getContext().getParent() != null) {
-				event = request.getContext().getParent().asType(Event.class);
-			} else {
-				event = eventRegistration.getEvent();
-			}
-			if (event != null && !Beans.get(EventRegistrationSevice.class).isRegistrationCapacityIsNotFull(event)) {
+    if (eventRegistration.getId() == null) {
 
-				response.setValue("regDate", null);
+      Event event = null;
+      if (request.getContext().getParent() != null) {
+        event = request.getContext().getParent().asType(Event.class);
+      } else {
+        event = eventRegistration.getEvent();
+      }
+      if (event != null
+          && !Beans.get(EventRegistrationSevice.class).isRegistrationCapacityIsNotFull(event)) {
 
-				response.setFlash("Exceed Event Capacity");
-				response.setFlash(I18n.get(IExceptionEvent.ERROR_EVENT_CAPACITY));
-			}
-		}//end check
-	}
+        response.setValue("regDate", null);
+
+        response.setFlash("Exceed Event Capacity");
+        response.setFlash(I18n.get(IExceptionEvent.ERROR_EVENT_CAPACITY));
+      }
+    }
+  }
 }
