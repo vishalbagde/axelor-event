@@ -25,15 +25,15 @@
         showIf="id" onClick="action-event-view-import-event-registration" />
 
       <button name="emailSendBtn" title="Email Send" showIf="id"
-        onClick="action-event-method-on-click-send-email,save" />
+        onClick="save,action-event-method-on-click-send-email" />
 
       <button name="reportBtn" title="Report" showIf="id"
         onClick="action-event-report-on-click-generate-report" />
 
     </toolbar>
     <panel name="overviewPanel">
-      <field name="reference"/>
-      <field name="venue"/>
+      <field name="reference" />
+      <field name="venue" />
       <field name="startDate" onChange="action-event-condition-on-change-check-date" />
       <field name="endDate" onChange="action-event-condition-on-change-check-date" />
       <field name="regOpenDate" onChange="action-event-condition-on-change-check-date" />
@@ -48,9 +48,9 @@
     </panel>
 
     <panel name="eventRegPenel">
-      <panel-related field="eventRegistrationList" colSpan="12" canNew="capacity > totalEntry"
-        form-view="event-registration-form" grid-view="event-registration-event-grid"
-        onChange="action-event-method-on-change-compute-event-total" />
+      <panel-related field="eventRegistrationList" colSpan="12"
+        canNew="capacity > totalEntry" form-view="event-registration-form"
+        grid-view="event-registration-event-grid" onChange="action-event-method-on-change-compute-event-total" />
     </panel>
 
     <panel name="descPanel" colSpan="12">
@@ -130,7 +130,8 @@
 
   <action-condition name="action-event-condition-on-change-check-date">
 
-    <check field="startDate" if="startDate == null || endDate !=null &amp;&amp; startDate &gt; endDate"
+    <check field="startDate"
+      if="startDate == null || endDate !=null &amp;&amp; startDate &gt; endDate"
       error="Start Date should not After End Date" />
 
     <check field="endDate"
@@ -147,20 +148,20 @@
   </action-condition>
 
   <action-method name="action-event-method-on-change-compute-event-total">
-    <call class="com.axelor.event.web.EventEventController" method="computeTotal"/>
+    <call class="com.axelor.event.web.EventEventController" method="computeTotal" />
   </action-method>
 
   <action-method name="action-event-method-on-change-verify-event">
-    <call class="com.axelor.event.web.EventEventController" method="verifyEvent"/>
+    <call class="com.axelor.event.web.EventEventController" method="verifyEvent" />
   </action-method>
 
   <action-method name="action-event-method-on-click-send-email">
-    <call class="com.axelor.event.web.EventEventController" method="emailSend"/>
+    <call class="com.axelor.event.web.EventEventController" method="emailSend" />
   </action-method>
 
   <action-report output="${date}${time}"
     name="action-event-report-on-click-generate-report" design="event_report.rptdesign">
-    <param name="eventId" expr="eval: id"/>
+    <param name="eventId" expr="eval: id" />
   </action-report>
 
 </object-views>

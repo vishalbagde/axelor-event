@@ -16,16 +16,15 @@ public class EventRegistrationServiceImpl implements EventRegistrationSevice {
       EventRegistration eventRegistration, Event event) {
 
     Period intervalPeriod = Period.between(eventRegistration.getRegDate(), event.getRegCloseDate());
-    System.err.println(intervalPeriod.getDays());
 
     BigDecimal discountAmount = BigDecimal.ZERO;
 
     List<Discount> discountList = event.getDiscountList();
 
     if (discountList != null && !discountList.isEmpty()) {
+
       discountList =
-          event
-              .getDiscountList()
+          discountList
               .stream()
               .sorted(
                   Comparator.comparing(Discount::getBeforeDays)
@@ -34,8 +33,12 @@ public class EventRegistrationServiceImpl implements EventRegistrationSevice {
               .collect(Collectors.toList());
 
       for (Discount discount : discountList) {
-        if (intervalPeriod.getDays() > discount.getBeforeDays()) {
-          System.err.println("selected Discount : " + discount.getBeforeDays());
+        if (intervalPeriod.getDays() >= discount.getBeforeDays()) {
+          System.err.println(
+              "selected Discount : "
+                  + discount.getBeforeDays()
+                  + " Discount Amount : "
+                  + discount.getDiscountAmount());
           discountAmount = discount.getDiscountAmount();
           break;
         }

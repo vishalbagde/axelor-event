@@ -6,12 +6,12 @@
   <module package="com.axelor.event.db" name="event" />
   <entity name="Event">
     <string name="reference" title="Reference" namecolumn="true" />
-    <datetime name="startDate" title="Start Date" required="true" />
-    <datetime name="endDate" title="End Date"  required="true"/>
+    <datetime name="startDate" title="Start Date"  />
+    <datetime name="endDate" title="End Date"  />
     <many-to-one name="venue" ref="com.axelor.event.db.Address"
       title="Venue" />
-    <date name="regOpenDate" title="Registration Open Date"  required="true" />
-    <date name="regCloseDate" title="Registration Close Date" required="true" />
+    <date name="regOpenDate" title="Registration Open Date"   />
+    <date name="regCloseDate" title="Registration Close Date"  />
     <integer name="capacity" title="Capacity"/>
     <decimal name="eventFees" title="Event Fees"/>
     <string name="description" large="true" title="Description" />

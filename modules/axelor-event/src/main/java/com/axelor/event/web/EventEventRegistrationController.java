@@ -21,19 +21,22 @@ public class EventEventRegistrationController {
       event = eventRegistration.getEvent();
     }
     if (event != null) {
-      if (event.getRegOpenDate() == null
-          || event.getRegCloseDate() == null
-          || eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) < 0
-          || eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) > 0) {
+      if (event.getRegOpenDate() != null && event.getRegCloseDate() != null) {
 
+        if (eventRegistration.getRegDate().compareTo(event.getRegOpenDate()) < 0
+            || eventRegistration.getRegDate().compareTo(event.getRegCloseDate()) > 0) {
+
+          response.setValue("amount", BigDecimal.ZERO);
+          response.setValue("regDate", null);
+          response.setFlash(
+              "Reg Date are must between "
+                  + event.getRegOpenDate()
+                  + " And "
+                  + event.getRegCloseDate());
+        }
+      } else {
         response.setValue("regDate", null);
-        response.setValue("amount", BigDecimal.ZERO);
-
-        response.setFlash(
-            "Reg Date are must between "
-                + event.getRegOpenDate()
-                + " And "
-                + event.getRegCloseDate());
+        response.setFlash("Invalid Registration Date or select Registration Date");
       }
     }
   }

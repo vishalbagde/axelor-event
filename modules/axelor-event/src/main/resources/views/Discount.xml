@@ -9,7 +9,7 @@
     <field name="discountAmount"/>
   </grid>
 
-  <form name="discount-form" model="com.axelor.event.db.Discount" title="Discount">
+  <form name="discount-form" model="com.axelor.event.db.Discount" title="Discount" onNew="action-event-condition-on-change-check-before-days">
     <panel name="mainPanel">
       <field name="beforeDays" onChange="action-event-condition-on-change-check-before-days" />
       <field name="discountPercent" onChange="action-event-method-on-change-days-calculate-discount-amount"/>
