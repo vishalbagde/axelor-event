@@ -46,6 +46,7 @@ public class EventServiceImpl implements EventService {
     Integer totalEntry = 0;
     BigDecimal totalCollection = BigDecimal.ZERO;
     BigDecimal totalDiscount = BigDecimal.ZERO;
+    BigDecimal totalFees = BigDecimal.ZERO;
 
     List<EventRegistration> eventRegistrationList = event.getEventRegistrationList();
 
@@ -56,8 +57,16 @@ public class EventServiceImpl implements EventService {
               .stream()
               .map(x -> x.getAmount())
               .reduce(BigDecimal.ZERO, BigDecimal::add);
-      totalDiscount =
-          event.getEventFees().multiply(new BigDecimal(totalEntry)).subtract(totalCollection);
+
+      totalFees = event.getEventFees().multiply(new BigDecimal(totalEntry));
+
+      if (totalFees.compareTo(totalCollection) > 0) {
+
+        totalDiscount =
+            event.getEventFees().multiply(new BigDecimal(totalEntry)).subtract(totalCollection);
+      } else {
+        totalDiscount = BigDecimal.ZERO;
+      }
 
       event.setAmountCollected(totalCollection);
       event.setTotalDiscount(totalDiscount);

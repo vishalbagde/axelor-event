@@ -16,7 +16,9 @@ public class EventEventRegistrationController {
     EventRegistration eventRegistration = request.getContext().asType(EventRegistration.class);
     Event event = null;
     if (request.getContext().getParent() != null) {
+
       event = request.getContext().getParent().asType(Event.class);
+
     } else {
       event = eventRegistration.getEvent();
     }
@@ -28,6 +30,7 @@ public class EventEventRegistrationController {
 
           response.setValue("amount", BigDecimal.ZERO);
           response.setValue("regDate", null);
+
           response.setFlash(
               "Reg Date are must between "
                   + event.getRegOpenDate()

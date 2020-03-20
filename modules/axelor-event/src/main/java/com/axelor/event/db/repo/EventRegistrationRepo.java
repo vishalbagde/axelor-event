@@ -2,6 +2,8 @@ package com.axelor.event.db.repo;
 
 import com.axelor.event.db.Event;
 import com.axelor.event.db.EventRegistration;
+import com.axelor.event.service.EventService;
+import com.axelor.inject.Beans;
 import com.google.inject.Inject;
 import java.math.BigDecimal;
 
@@ -20,5 +22,14 @@ public class EventRegistrationRepo extends EventRegistrationRepository {
     event.setTotalDiscount(event.getTotalDiscount().subtract(discount));
 
     eventRepo.save(event);
+  }
+
+  @Override
+  public EventRegistration save(EventRegistration entity) {
+
+    Event event = entity.getEvent();
+    event = Beans.get(EventService.class).verifyEvent(event);
+    eventRepo.save(event);
+    return entity;
   }
 }

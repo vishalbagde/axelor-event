@@ -47,10 +47,9 @@ public class EventEventController {
       response.setError("Invalid File Type");
     }
 
-    response.setFlash("CSV DATA Import Successful");
+    response.setNotify("Data Imported");
     response.setCanClose(true);
-    // response.setReload(true);
-
+ 
   }
 
   public void emailSend(ActionRequest request, ActionResponse response) {
